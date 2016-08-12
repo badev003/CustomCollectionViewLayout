@@ -22,10 +22,15 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
         self.collectionView.registerNib(UINib(nibName: "ContentCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: contentCellIdentifier)
         self.leftCollectionView.registerNib(UINib(nibName: "ContentCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: contentCellIdentifier)
         
+        self.collectionView.showsVerticalScrollIndicator = false
+        self.leftCollectionView.showsVerticalScrollIndicator = false
+        
+        self.collectionView.showsHorizontalScrollIndicator = false
+        self.leftCollectionView.showsHorizontalScrollIndicator = false
+        
         //Now set Tag to identify the collectionViews
         self.collectionView.tag = 1000
         self.leftCollectionView.tag = 1001
-        
     }
     
     
@@ -37,7 +42,7 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
     
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 8
+        return collectionView.tag == 1000 ?  6 : 5
     }
     
     
@@ -93,6 +98,44 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
                 return contentCell
             }
         }
+    }
+    
+    private func scrollViewScrollToPoint(point: CGPoint, scrollView: UIScrollView) {
+        if scrollView.isEqual(self.collectionView) {
+            let leftCollectionViewOffSetX = self.leftCollectionView.contentSize.width - self.leftCollectionView.bounds.size.width - point.x
+            self.leftCollectionView.contentOffset.y = point.y
+            self.leftCollectionView.contentOffset.x = leftCollectionViewOffSetX
+        } else {
+            self.collectionView.contentOffset.y = point.y
+            let leftCollectionViewOffSetX = self.leftCollectionView.contentSize.width - self.leftCollectionView.bounds.size.width - point.x
+            self.collectionView.contentOffset.x = leftCollectionViewOffSetX
+        }
+        scrollView.contentOffset = point
+    }
+    
+    private func enableScrolling(time: Float, scrollView: UIScrollView) {
+        let delayTime = dispatch_time(DISPATCH_TIME_NOW, Int64(time * Float(NSEC_PER_SEC)))
+        dispatch_after(delayTime, dispatch_get_main_queue()) {
+            scrollView.scrollEnabled = true
+        }
+    }
+
+}
+
+extension CollectionViewController : UIScrollViewDelegate {
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        let offSet = scrollView.contentOffset
+        guard offSet.x < scrollView.contentSize.width - scrollView.bounds.size.width && offSet.x >= 0 else {
+            scrollView.scrollEnabled = false
+            self.enableScrolling(0.01, scrollView: scrollView)
+            return
+        }
+        self.scrollViewScrollToPoint(scrollView.contentOffset, scrollView: scrollView)
+    }
+    
+    func scrollViewShouldScrollToTop(scrollView: UIScrollView) -> Bool {
+        return false
     }
 }
 

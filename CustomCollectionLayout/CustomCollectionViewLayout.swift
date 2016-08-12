@@ -10,35 +10,44 @@ import UIKit
 
 class CustomCollectionViewLayout: UICollectionViewLayout {
 
-    let numberOfColumns = 8
+    var numberOfColumns : Int {
+        return self.collectionView?.tag == 1000 ? 6 : 5
+    }
+    
     var itemAttributes : NSMutableArray!
     var itemsSize : NSMutableArray!
     var contentSize : CGSize!
     
     override func prepareLayout() {
-        if self.collectionView?.numberOfSections() == 0 {
+        
+        guard let collectionView = self.collectionView else {
+            return
+        }
+        
+        if collectionView.numberOfSections() == 0 {
             return
         }
         
         if (self.itemAttributes != nil && self.itemAttributes.count > 0) {
-            for section in 0..<self.collectionView!.numberOfSections() {
-                var numberOfItems : Int = self.collectionView!.numberOfItemsInSection(section)
+            for section in 0..<collectionView.numberOfSections() {
+                let numberOfItems : Int = collectionView.numberOfItemsInSection(section)
                 for index in 0..<numberOfItems {
                     if section != 0 && index != 0 {
                         continue
                     }
                     
-                    var attributes : UICollectionViewLayoutAttributes = self.layoutAttributesForItemAtIndexPath(NSIndexPath(forItem: index, inSection: section))
-                    if section == 0 {
-                        var frame = attributes.frame
-                        frame.origin.y = self.collectionView!.contentOffset.y
-                        attributes.frame = frame
-                    }
-                    
-                    if index == 0 {
-                        var frame = attributes.frame
-                        frame.origin.x = self.collectionView!.contentOffset.x
-                        attributes.frame = frame
+                    if let attributes = self.layoutAttributesForItemAtIndexPath(NSIndexPath(forItem: index, inSection: section)) {
+                        if section == 0 {
+                            var frame = attributes.frame
+                            frame.origin.y = collectionView.contentOffset.y
+                            attributes.frame = frame
+                        }
+                        
+                        if index == 0 && collectionView.tag == 1000 {
+                            var frame = attributes.frame
+                            frame.origin.x = collectionView.contentOffset.x
+                            attributes.frame = frame
+                        }
                     }
                 }
             }
@@ -56,12 +65,12 @@ class CustomCollectionViewLayout: UICollectionViewLayout {
         var contentHeight : CGFloat = 0
         
         for section in 0..<self.collectionView!.numberOfSections() {
-            var sectionAttributes = NSMutableArray()
+            let sectionAttributes = NSMutableArray()
             
             for index in 0..<numberOfColumns {
-                var itemSize = self.itemsSize[index].CGSizeValue()
-                var indexPath = NSIndexPath(forItem: index, inSection: section)
-                var attributes = UICollectionViewLayoutAttributes(forCellWithIndexPath: indexPath)
+                let itemSize = self.itemsSize[index].CGSizeValue()
+                let indexPath = NSIndexPath(forItem: index, inSection: section)
+                let attributes = UICollectionViewLayoutAttributes(forCellWithIndexPath: indexPath)
                 attributes.frame = CGRectIntegral(CGRectMake(xOffset, yOffset, itemSize.width, itemSize.height))
                 
                 if section == 0 && index == 0 {
@@ -72,19 +81,19 @@ class CustomCollectionViewLayout: UICollectionViewLayout {
                 
                 if section == 0 {
                     var frame = attributes.frame
-                    frame.origin.y = self.collectionView!.contentOffset.y
+                    frame.origin.y = collectionView.contentOffset.y
                     attributes.frame = frame
                 }
-                if index == 0 {
+                if index == 0 && collectionView.tag == 1000 {
                     var frame = attributes.frame
-                    frame.origin.x = self.collectionView!.contentOffset.x
+                    frame.origin.x = collectionView.contentOffset.x
                     attributes.frame = frame
                 }
                 
                 sectionAttributes.addObject(attributes)
                 
                 xOffset += itemSize.width
-                column++
+                column = column + 1
                 
                 if column == numberOfColumns {
                     if xOffset > contentWidth {
@@ -97,12 +106,12 @@ class CustomCollectionViewLayout: UICollectionViewLayout {
                 }
             }
             if (self.itemAttributes == nil) {
-                self.itemAttributes = NSMutableArray(capacity: self.collectionView!.numberOfSections())
+                self.itemAttributes = NSMutableArray(capacity: collectionView.numberOfSections())
             }
             self.itemAttributes .addObject(sectionAttributes)
         }
         
-        var attributes : UICollectionViewLayoutAttributes = self.itemAttributes.lastObject?.lastObject as! UICollectionViewLayoutAttributes
+        let attributes : UICollectionViewLayoutAttributes = self.itemAttributes.lastObject?.lastObject as! UICollectionViewLayoutAttributes
         contentHeight = attributes.frame.origin.y + attributes.frame.size.height
         self.contentSize = CGSizeMake(contentWidth, contentHeight)
     }
@@ -111,8 +120,8 @@ class CustomCollectionViewLayout: UICollectionViewLayout {
         return self.contentSize
     }
     
-    override func layoutAttributesForItemAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes! {
-        return self.itemAttributes[indexPath.section][indexPath.row] as! UICollectionViewLayoutAttributes
+    override func layoutAttributesForItemAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+        return self.itemAttributes[indexPath.section][indexPath.row] as? UICollectionViewLayoutAttributes
     }
     
     override func layoutAttributesForElementsInRect(rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
