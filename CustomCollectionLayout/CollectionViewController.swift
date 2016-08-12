@@ -12,13 +12,20 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
     let dateCellIdentifier = "DateCellIdentifier"
     let contentCellIdentifier = "ContentCellIdentifier"
     @IBOutlet weak var collectionView: UICollectionView!
-    
+    @IBOutlet weak var leftCollectionView: UICollectionView!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.collectionView .registerNib(UINib(nibName: "DateCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: dateCellIdentifier)
-        self.collectionView .registerNib(UINib(nibName: "ContentCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: contentCellIdentifier)
+        self.collectionView.registerNib(UINib(nibName: "DateCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: dateCellIdentifier)
+        self.collectionView.registerNib(UINib(nibName: "ContentCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: contentCellIdentifier)
+        self.leftCollectionView.registerNib(UINib(nibName: "ContentCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: contentCellIdentifier)
+        
+        //Now set Tag to identify the collectionViews
+        self.collectionView.tag = 1000
+        self.leftCollectionView.tag = 1001
+        
     }
     
     
@@ -37,7 +44,7 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         if indexPath.section == 0 {
-            if indexPath.row == 0 {
+            if indexPath.row == 0 && collectionView.tag == 1000 {
                 let dateCell : DateCollectionViewCell = collectionView .dequeueReusableCellWithReuseIdentifier(dateCellIdentifier, forIndexPath: indexPath) as! DateCollectionViewCell
                 dateCell.backgroundColor = UIColor.whiteColor()
                 dateCell.dateLabel.font = UIFont.systemFontOfSize(13)
@@ -60,7 +67,7 @@ class CollectionViewController: UIViewController, UICollectionViewDataSource, UI
                 return contentCell
             }
         } else {
-            if indexPath.row == 0 {
+            if indexPath.row == 0  && collectionView.tag == 1000 {
                 let dateCell : DateCollectionViewCell = collectionView .dequeueReusableCellWithReuseIdentifier(dateCellIdentifier, forIndexPath: indexPath) as! DateCollectionViewCell
                 dateCell.dateLabel.font = UIFont.systemFontOfSize(13)
                 dateCell.dateLabel.textColor = UIColor.blackColor()
