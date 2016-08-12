@@ -128,7 +128,7 @@ extension CollectionViewController : UIScrollViewDelegate {
         let offSet = scrollView.contentOffset
         guard offSet.x < scrollView.contentSize.width - scrollView.bounds.size.width && offSet.x >= 0 else {
             scrollView.scrollEnabled = false
-            self.enableScrolling(0.01, scrollView: scrollView)
+            self.enableScrolling(0.001, scrollView: scrollView)
             return
         }
         self.scrollViewScrollToPoint(scrollView.contentOffset, scrollView: scrollView)
